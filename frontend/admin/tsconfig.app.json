@@ -15,11 +15,25 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Path aliases — baseUrl "." = frontend/admin.
+       External packages are mapped so TypeScript can resolve them for files
+       inside frontend/shared/ (which has no node_modules of its own). */
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/client": ["./node_modules/@types/react-dom/client"],
+      "react-router-dom": ["./node_modules/react-router-dom"]
+    },
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "../shared"]
 }

@@ -21,6 +21,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 #-------------------------
 /nbproject/
 .idea/*
+.vscode/
 
 ## Sublime Text cache files
 *.tmlanguage.cache
@@ -30,3 +31,21 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.sublime-project
 /tests/tests/
 /tests/results/
+
+# Node / React
+#-------------------------
+frontend/admin/node_modules/
+frontend/report/node_modules/
+frontend/admin/dist/
+frontend/report/dist/
+
+# OS
+Thumbs.db
+
+# React build outputs — commit these for simple deploy (Option A).
+# Uncomment the lines below if using CI/CD to build (Option B).
+react-assets/admin/
+react-assets/report/
+
+.env
+.env*
