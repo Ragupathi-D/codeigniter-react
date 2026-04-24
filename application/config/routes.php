@@ -53,10 +53,30 @@ $route['default_controller'] = 'auth/login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['auth/login']            = 'auth/login';
-$route['auth/logout']           = 'auth/logout';
-$route['dashboard']             = 'dashboard/index';
-$route['admin']                 = 'admin/index';
-$route['admin/detail/(:num)']   = 'admin/detail/$1';
-$route['report']                = 'report/index';
-$route['report/detail/(:num)']  = 'report/detail/$1';
+// -------------------------------------------------------------------------
+// API Routes — JSON responses, handled by MY_API_Controller subclasses
+// -------------------------------------------------------------------------
+$route['api/auth/login']            = 'api/auth/login';
+$route['api/auth/check']            = 'api/auth/check';
+$route['api/auth/logout']           = 'api/auth/logout';
+
+$route['api/admin/users']           = 'api/admin/users';
+$route['api/admin/users/(:num)']    = 'api/admin/user/$1';
+
+$route['api/report/list']           = 'api/report/list';
+$route['api/report/detail/(:num)']  = 'api/report/detail/$1';
+
+// -------------------------------------------------------------------------
+// SPA Catch-All Routes — React Router handles sub-paths inside each module
+// -------------------------------------------------------------------------
+$route['admin']                     = 'spa/admin';
+$route['admin/(:any)']              = 'spa/admin';
+$route['report']                    = 'spa/report';
+$route['report/(:any)']             = 'spa/report';
+
+// -------------------------------------------------------------------------
+// Existing PHP Routes
+// -------------------------------------------------------------------------
+$route['auth/login']                = 'auth/login';
+$route['auth/logout']               = 'auth/logout';
+$route['dashboard']                 = 'dashboard/index';
