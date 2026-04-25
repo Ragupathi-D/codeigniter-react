@@ -1,50 +1,59 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-// The CI3 sub-directory path (must match config.php base_url path segment)
-const CI3_BASE = '/ragu/codeigniter-react'
+export default defineConfig(({ mode }) => {
+	const sharedEnv = loadEnv(mode, path.resolve(__dirname, "../shared"), "");
+	const localEnv = loadEnv(mode, __dirname, "");
+	const env = { ...sharedEnv, ...localEnv }; // local wins
+	const VITE_MODULE = env.VITE_MODULE;
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+	const CI3_BASE = env.VITE_CI3_BASE;
+	const DEV_PORT = Number(env.VITE_DEV_PORT ?? 5174);
 
-  // Base public path — must match the URL prefix Apache/CI3 serves this app on
-  base: `${CI3_BASE}/report/`,
+	const NODE_ENV = env.NODE_ENV;
+	return {
+		plugins: [react()],
+		base: NODE_ENV === "production" ? `${CI3_BASE}/${VITE_MODULE}/` : undefined,
 
-  server: {
-    port: 5174,
-    strictPort: true,
+		define: {
+			...Object.fromEntries(
+				Object.entries(env)
+					.filter(([k]) => k.startsWith("VITE_"))
+					.map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]),
+			),
+		},
 
-    // Proxy API calls to CI3 (Apache) so the session cookie works
-    proxy: {
-      [`${CI3_BASE}/api`]: {
-        target: 'http://localhost',
-        changeOrigin: false,
-      },
-    },
-  },
+		server: {
+			port: DEV_PORT,
+			strictPort: true,
+			proxy: {
+				[`${CI3_BASE}/api`]: {
+					target: "http://localhost",
+					changeOrigin: false,
+				},
+			},
+		},
 
-  resolve: {
-    alias: {
-      // Shared code alias
-      '@shared': path.resolve(__dirname, '../shared'),
-      // Explicit aliases for packages used in frontend/shared/ — Vite/Rolldown
-      // resolves imports from a file's own directory upward and would miss
-      // node_modules that live in frontend/report (a sibling of shared).
-      'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-    },
-  },
+		resolve: {
+			alias: {
+				"@shared": path.resolve(__dirname, "../shared"),
+				"react-router-dom": path.resolve(
+					__dirname,
+					"node_modules/react-router-dom",
+				),
+				react: path.resolve(__dirname, "node_modules/react"),
+				"react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+			},
+		},
 
-  build: {
-    // Output to react-assets/report/ (relative to project root)
-    outDir: '../../react-assets/report',
-    emptyOutDir: true,
-    manifest: true,
-    rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),
-    },
-  },
-})
+		build: {
+			outDir: "../../react-assets/report",
+			emptyOutDir: true,
+			manifest: true,
+			rollupOptions: {
+				input: path.resolve(__dirname, "index.html"),
+			},
+		},
+	};
+});
