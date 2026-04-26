@@ -70,9 +70,9 @@ $route['api/report/detail/(:num)']  = 'api/report/detail/$1';
 // SPA Catch-All Routes — React Router handles sub-paths inside each module
 // -------------------------------------------------------------------------
 $route['admin']                     = 'spa/admin';
-$route['admin/(:any)']              = 'spa/admin';
+$route['admin/(.+)']                = 'spa/admin';
 $route['report']                    = 'spa/report';
-$route['report/(:any)']             = 'spa/report';
+$route['report/(.+)']               = 'spa/report';
 
 // -------------------------------------------------------------------------
 // Existing PHP Routes
