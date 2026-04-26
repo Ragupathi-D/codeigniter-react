@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useMemo, useState } from 'react'
 import {
 	useReactTable,
 	getCoreRowModel,
@@ -7,7 +7,7 @@ import {
 	type ColumnDef,
 	type RowData,
 	type ColumnFiltersState,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table'
 import {
 	Table,
 	TableBody,
@@ -15,7 +15,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table'
 
 interface DataTableProps<TData extends RowData> {
 	columns: ColumnDef<TData>[]
@@ -53,7 +53,7 @@ export function DataTable<TData extends RowData>({
 							{headerGroup.headers.map((header, i) => (
 								<TableHead
 									key={header.id}
-									className={i === 0 ? "w-12 pl-6" : ""}
+									className={i === 0 ? 'w-12 pl-6' : ''}
 								>
 									{header.isPlaceholder
 										? null
@@ -73,11 +73,11 @@ export function DataTable<TData extends RowData>({
 								{headerGroup.headers.map((header, i) => (
 									<TableHead
 										key={`${header.id}-filter`}
-										className={`py-1.5 ${i === 0 ? "pl-6" : ""}`}
+										className={`py-1.5 ${i === 0 ? 'pl-6' : ''}`}
 									>
 										{header.column.getCanFilter() ? (
 											<input
-												value={(header.column.getFilterValue() as string) ?? ""}
+												value={(header.column.getFilterValue() as string) ?? ''}
 												onChange={(e) =>
 													header.column.setFilterValue(e.target.value)
 												}
@@ -97,10 +97,10 @@ export function DataTable<TData extends RowData>({
 					rows.map((row) => (
 						<TableRow
 							key={row.id}
-							data-state={row.getIsSelected() && "selected"}
+							data-state={row.getIsSelected() && 'selected'}
 						>
 							{row.getVisibleCells().map((cell, i) => (
-								<TableCell key={cell.id} className={i === 0 ? "pl-6" : ""}>
+								<TableCell key={cell.id} className={i === 0 ? 'pl-6' : ''}>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								</TableCell>
 							))}
