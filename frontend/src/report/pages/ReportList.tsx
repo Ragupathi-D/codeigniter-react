@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { type ColumnDef } from '@tanstack/react-table';
 import api from '@shared/api/client';
 import Layout from '../components/Layout';
 import type { Report } from '../types';
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DataTable } from '@/components/ui/data-table';
 import { BarChart2, CheckCircle, Pencil, Eye, AlertTriangle } from 'lucide-react';
 
 interface ApiResponse {
@@ -25,6 +26,91 @@ const CATEGORY_CLASSES: Record<string, string> = {
   HR: 'bg-slate-100 text-slate-600 border-slate-200',
   Management: 'bg-red-100 text-red-700 border-red-200',
 };
+
+const columns: ColumnDef<Report>[] = [
+  {
+    accessorKey: 'id',
+    header: '#',
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{getValue<number>()}</span>
+    ),
+  },
+  {
+    accessorKey: 'title',
+    header: 'Title',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => (
+      <span className="font-medium">{getValue<string>()}</span>
+    ),
+  },
+  {
+    accessorKey: 'category',
+    header: 'Category',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => {
+      const category = getValue<string>();
+      return (
+        <Badge
+          variant="outline"
+          className={`rounded-full ${CATEGORY_CLASSES[category] ?? 'bg-slate-100 text-slate-600 border-slate-200'}`}
+        >
+          {category}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: 'author',
+    header: 'Author',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{getValue<string>()}</span>
+    ),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => {
+      const status = getValue<string>();
+      const isPublished = status === 'Published';
+      return (
+        <Badge
+          variant="outline"
+          className={`rounded-full gap-1 ${
+            isPublished
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+          }`}
+        >
+          {isPublished ? <CheckCircle size={11} /> : <Pencil size={11} />}
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: 'created',
+    header: 'Created',
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{formatDate(getValue<string>())}</span>
+    ),
+  },
+  {
+    id: 'actions',
+    header: () => <span className="flex justify-end pr-4">Actions</span>,
+    cell: ({ row }) => (
+      <div className="text-right pr-4">
+        <Button variant="outline" size="sm" asChild>
+          <Link to={`/detail/${row.original.id}`} className="gap-1.5">
+            <Eye size={13} />
+            View
+          </Link>
+        </Button>
+      </div>
+    ),
+  },
+];
 
 export default function ReportList() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -68,62 +154,7 @@ export default function ReportList() {
             </Alert>
           )}
 
-          {!loading && !error && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6 w-12">#</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right pr-6">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reports.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="pl-6 text-muted-foreground">{r.id}</TableCell>
-                    <TableCell className="font-medium">{r.title}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`rounded-full ${CATEGORY_CLASSES[r.category] ?? 'bg-slate-100 text-slate-600 border-slate-200'}`}
-                      >
-                        {r.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{r.author}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`rounded-full gap-1 ${
-                          r.status === 'Published'
-                            ? 'bg-green-50 text-green-700 border-green-200'
-                            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                        }`}
-                      >
-                        {r.status === 'Published'
-                          ? <CheckCircle size={11} />
-                          : <Pencil size={11} />}
-                        {r.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(r.created)}</TableCell>
-                    <TableCell className="text-right pr-6">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/detail/${r.id}`} className="gap-1.5">
-                          <Eye size={13} />
-                          View
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          {!loading && !error && <DataTable columns={columns} data={reports} />}
         </CardContent>
       </Card>
     </Layout>

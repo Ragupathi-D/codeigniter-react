@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { type ColumnDef } from '@tanstack/react-table';
 import api from '@shared/api/client';
 import Layout from '../components/Layout';
 import type { User } from '../types';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DataTable } from '@/components/ui/data-table';
 import { Users, CheckCircle, MinusCircle, Eye, AlertTriangle } from 'lucide-react';
 
 interface ApiResponse {
@@ -17,6 +18,98 @@ interface ApiResponse {
   data: User[];
   total: number;
 }
+
+const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: 'id',
+    header: '#',
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{getValue<number>()}</span>
+    ),
+  },
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => {
+      const name = getValue<string>();
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar className="size-[34px] shrink-0">
+            <AvatarFallback
+              className="text-white text-[13px] font-bold"
+              style={{ background: avatarColor(name) }}
+            >
+              {initials(name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-medium">{name}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{getValue<string>()}</span>
+    ),
+  },
+  {
+    accessorKey: 'department',
+    header: 'Department',
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: 'role',
+    header: 'Role',
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    enableColumnFilter: true,
+    cell: ({ getValue }) => {
+      const status = getValue<string>();
+      const isActive = status === 'Active';
+      return (
+        <Badge
+          variant="outline"
+          className={`rounded-full gap-1 ${
+            isActive
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-slate-50 text-slate-500 border-slate-200'
+          }`}
+        >
+          {isActive ? <CheckCircle size={11} /> : <MinusCircle size={11} />}
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: 'joined',
+    header: 'Joined',
+    cell: ({ getValue }) => (
+      <span className="text-muted-foreground">{formatDate(getValue<string>())}</span>
+    ),
+  },
+  {
+    id: 'actions',
+    header: () => <span className="flex justify-end pr-4">Actions</span>,
+    cell: ({ row }) => (
+      <div className="text-right pr-4">
+        <Button variant="outline" size="sm" asChild>
+          <Link to={`/users/${row.original.id}`} className="gap-1.5">
+            <Eye size={13} />
+            View
+          </Link>
+        </Button>
+      </div>
+    ),
+  },
+];
 
 export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
@@ -60,69 +153,7 @@ export default function UserList() {
             </Alert>
           )}
 
-          {!loading && !error && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6 w-12">#</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right pr-6">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="pl-6 text-muted-foreground">{u.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="size-[34px] shrink-0">
-                          <AvatarFallback
-                            className="text-white text-[13px] font-bold"
-                            style={{ background: avatarColor(u.name) }}
-                          >
-                            {initials(u.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{u.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                    <TableCell>{u.department}</TableCell>
-                    <TableCell>{u.role}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`rounded-full gap-1 ${
-                          u.status === 'Active'
-                            ? 'bg-green-50 text-green-700 border-green-200'
-                            : 'bg-slate-50 text-slate-500 border-slate-200'
-                        }`}
-                      >
-                        {u.status === 'Active'
-                          ? <CheckCircle size={11} />
-                          : <MinusCircle size={11} />}
-                        {u.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(u.joined)}</TableCell>
-                    <TableCell className="text-right pr-6">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/users/${u.id}`} className="gap-1.5">
-                          <Eye size={13} />
-                          View
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          {!loading && !error && <DataTable columns={columns} data={users} />}
         </CardContent>
       </Card>
     </Layout>
