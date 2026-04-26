@@ -3,28 +3,38 @@ import { useParams, Link } from 'react-router-dom';
 import api from '@shared/api/client';
 import Layout from '../components/Layout';
 import type { Report } from '../types';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  ArrowLeft, CheckCircle, Pencil, AlertTriangle, FileText, AlignLeft,
+  DollarSign, Megaphone, Cpu, Wrench, Users, Briefcase,
+} from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 
 interface ApiResponse {
   success: boolean;
   data: Report;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Finance: 'text-success bg-success-subtle',
-  Marketing: 'text-primary bg-primary-subtle',
-  Technical: 'text-info bg-info-subtle',
-  Engineering: 'text-warning bg-warning-subtle',
-  HR: 'text-secondary bg-secondary-subtle',
-  Management: 'text-danger bg-danger-subtle',
+const CATEGORY_CLASSES: Record<string, string> = {
+  Finance: 'bg-green-100 text-green-700 border-green-200',
+  Marketing: 'bg-blue-100 text-blue-700 border-blue-200',
+  Technical: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+  Engineering: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  HR: 'bg-slate-100 text-slate-600 border-slate-200',
+  Management: 'bg-red-100 text-red-700 border-red-200',
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Finance: 'bi-currency-dollar',
-  Marketing: 'bi-megaphone-fill',
-  Technical: 'bi-cpu-fill',
-  Engineering: 'bi-wrench-adjustable',
-  HR: 'bi-people-fill',
-  Management: 'bi-briefcase-fill',
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Finance: DollarSign,
+  Marketing: Megaphone,
+  Technical: Cpu,
+  Engineering: Wrench,
+  HR: Users,
+  Management: Briefcase,
 };
 
 export default function ReportDetail() {
@@ -43,66 +53,78 @@ export default function ReportDetail() {
 
   return (
     <Layout title="Reports — Detail">
-      <div className="mb-3">
-        <Link to="/list" className="btn btn-sm btn-outline-secondary">
-          <i className="bi bi-arrow-left me-1" />
-          Back to Reports
-        </Link>
+      <div className="mb-4">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/list" className="gap-1.5">
+            <ArrowLeft size={14} />
+            Back to Reports
+          </Link>
+        </Button>
       </div>
 
       {loading && (
-        <div className="text-center py-5 text-muted">
-          <div className="spinner-border spinner-border-sm me-2" />
-          Loading…
+        <div className="grid grid-cols-[1fr_2fr] gap-4">
+          <Skeleton className="h-64 rounded-xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-40 rounded-xl" />
+          </div>
         </div>
       )}
 
       {error && (
-        <div className="alert alert-danger">
-          <i className="bi bi-exclamation-triangle me-2" />
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertTriangle size={16} />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {report && (
-        <div className="row g-4">
-          <div className="col-md-4">
-            <div className="card border-0 shadow-sm h-100 text-center p-4">
-              <div
-                className={`mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle ${CATEGORY_COLORS[report.category] ?? 'text-secondary bg-secondary-subtle'}`}
-                style={{ width: 72, height: 72, fontSize: 30 }}
-              >
-                <i className={`bi ${CATEGORY_ICONS[report.category] ?? 'bi-file-earmark-text'}`} />
-              </div>
-              <h5 className="fw-bold mb-2" style={{ fontSize: 15 }}>{report.title}</h5>
-              <span
-                className={`badge rounded-pill px-3 py-2 mb-3 mx-auto ${CATEGORY_COLORS[report.category] ?? 'text-secondary bg-secondary-subtle'}`}
+        <div className="grid grid-cols-[1fr_2fr] gap-4">
+          <Card className="shadow-sm border-0 text-center">
+            <CardContent className="pt-8 pb-6 flex flex-col items-center">
+              {(() => {
+                const Icon = CATEGORY_ICONS[report.category] ?? FileText;
+                const cls = CATEGORY_CLASSES[report.category] ?? 'bg-slate-100 text-slate-600';
+                return (
+                  <div className={`size-[72px] rounded-full flex items-center justify-center mb-3 ${cls}`}>
+                    <Icon size={30} />
+                  </div>
+                );
+              })()}
+              <h5 className="font-bold text-[15px] mb-2">{report.title}</h5>
+              <Badge
+                variant="outline"
+                className={`rounded-full px-3 py-1 mb-2 ${CATEGORY_CLASSES[report.category] ?? 'bg-slate-100 text-slate-600 border-slate-200'}`}
               >
                 {report.category}
-              </span>
-              <span
-                className={`badge rounded-pill px-3 py-2 mx-auto ${
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`rounded-full gap-1 px-3 py-1 ${
                   report.status === 'Published'
-                    ? 'bg-success-subtle text-success'
-                    : 'bg-warning-subtle text-warning'
+                    ? 'bg-green-50 text-green-700 border-green-200'
+                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                 }`}
               >
-                <i className={`bi ${report.status === 'Published' ? 'bi-check-circle' : 'bi-pencil'} me-1`} />
+                {report.status === 'Published'
+                  ? <CheckCircle size={12} />
+                  : <Pencil size={12} />}
                 {report.status}
-              </span>
-            </div>
-          </div>
+              </Badge>
+            </CardContent>
+          </Card>
 
-          <div className="col-md-8">
-            <div className="card border-0 shadow-sm">
-              <div className="card-header bg-white py-3">
-                <h6 className="mb-0 fw-semibold">
-                  <i className="bi bi-file-earmark-text-fill me-2 text-primary" />
+          <div className="space-y-4">
+            <Card className="shadow-sm border-0">
+              <CardHeader className="py-3 border-b space-y-0">
+                <h6 className="font-semibold flex items-center gap-2 m-0">
+                  <FileText size={15} className="text-primary" />
                   Report Information
                 </h6>
-              </div>
-              <div className="card-body">
-                <dl className="row mb-0">
+              </CardHeader>
+              <CardContent className="pt-5">
+                <dl className="grid grid-cols-[9rem_1fr] gap-y-4">
                   <DetailRow label="Report ID" value={`#${report.id}`} />
                   <DetailRow label="Title" value={report.title} />
                   <DetailRow label="Category" value={report.category} />
@@ -110,20 +132,20 @@ export default function ReportDetail() {
                   <DetailRow label="Status" value={report.status} />
                   <DetailRow label="Created" value={formatDate(report.created)} />
                 </dl>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="card border-0 shadow-sm mt-4">
-              <div className="card-header bg-white py-3">
-                <h6 className="mb-0 fw-semibold">
-                  <i className="bi bi-text-paragraph me-2 text-primary" />
+            <Card className="shadow-sm border-0">
+              <CardHeader className="py-3 border-b space-y-0">
+                <h6 className="font-semibold flex items-center gap-2 m-0">
+                  <AlignLeft size={15} className="text-primary" />
                   Summary
                 </h6>
-              </div>
-              <div className="card-body">
-                <p className="mb-0" style={{ lineHeight: 1.7, color: '#444' }}>{report.summary}</p>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <p className="text-[#444] leading-relaxed">{report.summary}</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
@@ -134,8 +156,8 @@ export default function ReportDetail() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <dt className="col-sm-4 text-muted fw-normal" style={{ fontSize: 14 }}>{label}</dt>
-      <dd className="col-sm-8 fw-medium mb-3">{value}</dd>
+      <dt className="text-muted-foreground text-sm font-normal">{label}</dt>
+      <dd className="font-medium">{value}</dd>
     </>
   );
 }

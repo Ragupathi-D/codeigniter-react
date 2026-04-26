@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
@@ -10,6 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+      tailwindcss(),
       {
         name: 'inject-admin-entry',
         transformIndexHtml: {
@@ -39,6 +41,7 @@ export default defineConfig(({ mode }) => {
 
     resolve: {
       alias: {
+        '@': path.resolve(__dirname, 'src'),
         '@shared': path.resolve(__dirname, 'src/shared'),
       },
     },

@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom';
 import api from '@shared/api/client';
 import Layout from '../components/Layout';
 import type { User } from '../types';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Users, CheckCircle, MinusCircle, Eye, AlertTriangle } from 'lucide-react';
 
 interface ApiResponse {
   success: boolean;
@@ -25,116 +33,104 @@ export default function UserList() {
 
   return (
     <Layout title="Admin — User Management">
-      <div className="card border-0 shadow-sm">
-        <div className="card-header bg-white d-flex align-items-center justify-content-between py-3">
-          <h5 className="mb-0 fw-semibold">
-            <i className="bi bi-people-fill me-2 text-primary" />
+      <Card className="shadow-sm border-0">
+        <CardHeader className="flex-row items-center py-3 border-b space-y-0">
+          <h5 className="font-semibold flex items-center gap-2 m-0">
+            <Users size={16} className="text-primary" />
             Users
             {!loading && (
-              <span className="badge bg-primary ms-2 fw-normal" style={{ fontSize: 12 }}>
-                {users.length}
-              </span>
+              <Badge className="font-normal text-xs">{users.length}</Badge>
             )}
           </h5>
-        </div>
+        </CardHeader>
 
-        <div className="card-body p-0">
+        <CardContent className="p-0">
           {loading && (
-            <div className="text-center py-5 text-muted">
-              <div className="spinner-border spinner-border-sm me-2" />
-              Loading users…
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
             </div>
           )}
 
           {error && (
-            <div className="alert alert-danger m-3">
-              <i className="bi bi-exclamation-triangle me-2" />
-              {error}
-            </div>
+            <Alert variant="destructive" className="m-3">
+              <AlertTriangle size={16} />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           {!loading && !error && (
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th className="ps-4">#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Joined</th>
-                    <th className="text-end pe-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id}>
-                      <td className="ps-4 text-muted">{u.id}</td>
-                      <td>
-                        <div className="d-flex align-items-center gap-2">
-                          <div
-                            style={{
-                              width: 34,
-                              height: 34,
-                              borderRadius: '50%',
-                              background: avatarColor(u.name),
-                              color: '#fff',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 700,
-                              fontSize: 13,
-                              flexShrink: 0,
-                            }}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6 w-12">#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="text-right pr-6">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((u) => (
+                  <TableRow key={u.id}>
+                    <TableCell className="pl-6 text-muted-foreground">{u.id}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="size-[34px] shrink-0">
+                          <AvatarFallback
+                            className="text-white text-[13px] font-bold"
+                            style={{ background: avatarColor(u.name) }}
                           >
                             {initials(u.name)}
-                          </div>
-                          <span className="fw-medium">{u.name}</span>
-                        </div>
-                      </td>
-                      <td className="text-muted">{u.email}</td>
-                      <td>{u.department}</td>
-                      <td>{u.role}</td>
-                      <td>
-                        <span
-                          className={`badge rounded-pill ${
-                            u.status === 'Active'
-                              ? 'bg-success-subtle text-success'
-                              : 'bg-secondary-subtle text-secondary'
-                          }`}
-                        >
-                          <i className={`bi ${u.status === 'Active' ? 'bi-check-circle' : 'bi-dash-circle'} me-1`} />
-                          {u.status}
-                        </span>
-                      </td>
-                      <td className="text-muted">{formatDate(u.joined)}</td>
-                      <td className="text-end pe-4">
-                        <Link to={`/users/${u.id}`} className="btn btn-sm btn-outline-primary">
-                          <i className="bi bi-eye me-1" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{u.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                    <TableCell>{u.department}</TableCell>
+                    <TableCell>{u.role}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`rounded-full gap-1 ${
+                          u.status === 'Active'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                        }`}
+                      >
+                        {u.status === 'Active'
+                          ? <CheckCircle size={11} />
+                          : <MinusCircle size={11} />}
+                        {u.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{formatDate(u.joined)}</TableCell>
+                    <TableCell className="text-right pr-6">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/users/${u.id}`} className="gap-1.5">
+                          <Eye size={13} />
                           View
                         </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Layout>
   );
 }
 
 function initials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
 const COLORS = ['#6c8ee8', '#e87c6c', '#6ce8b4', '#e8c46c', '#c46ce8', '#6cc4e8'];
